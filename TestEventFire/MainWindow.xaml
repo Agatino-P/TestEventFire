@@ -45,5 +45,13 @@
             </DockPanel>
         </Border>
 
+        <Border Margin="10" BorderBrush="Orange" BorderThickness="2">
+            <DockPanel>
+                <Button Click="btnResetLog_Click3" Content="Reset Log"
+                        DockPanel.Dock="Bottom" />
+                <TextBlock x:Name="txtLog3" MinWidth="200" MinHeight="200" />
+            </DockPanel>
+        </Border>
+
     </DockPanel>
 </Window>

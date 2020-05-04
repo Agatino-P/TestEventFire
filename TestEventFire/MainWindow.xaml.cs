@@ -8,13 +8,51 @@ namespace TestEventFire
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     /// 
-    internal class EventTestArgs : EventArgs
+    public class TestEventArgs : EventArgs
     {
         public string Testo { get; set; }
-        public EventTestArgs(string testo)
+        public TestEventArgs(string testo)
         {
             Testo = testo;
         }
+    }
+
+    public class Subscriber1
+    {
+        public string Name { get; set; }
+        private MainWindow _mainWindow;
+
+        public Subscriber1(MainWindow mainWindow, string name)
+        {
+            _mainWindow = mainWindow;
+            Name = name;
+            _mainWindow.TestEvent += Subscriber1OnTestEvent;
+        }
+
+        private void Subscriber1OnTestEvent(object sender, TestEventArgs e)
+        {
+            _mainWindow.txtLog3.Text += $"{DateTime.Now} - {Name} Received: {e.Testo}{Environment.NewLine}";
+        }
+    }
+
+
+    public class Subscriber2
+    {
+        public string Name { get; set; }
+        private MainWindow _mainWindow;
+
+        public Subscriber2(MainWindow mainWindow, string name)
+        {
+            _mainWindow = mainWindow;
+            Name = name;
+            _mainWindow.TestEvent += Subscriber2OnTestEvent;
+        }
+
+        private void Subscriber2OnTestEvent(object sender, TestEventArgs e)
+        {
+            _mainWindow.txtLog3.Text += $"{DateTime.Now} - {Name} Received: {e.Testo}{Environment.NewLine}";
+        }
+
     }
 
     public partial class MainWindow : Window
@@ -23,11 +61,13 @@ namespace TestEventFire
         private bool alreadySubscribed1 = false;
         private bool alreadySubscribed2 = false;
 
-        private event EventHandler<EventTestArgs> EventTest;// = delegate { };
+        public event EventHandler<TestEventArgs> TestEvent;// = delegate { };
 
         public MainWindow()
         {
             InitializeComponent();
+            Subscriber1 s1 = new Subscriber1(this, "S-uno");
+            Subscriber2 s2 = new Subscriber2(this, "S-due");
         }
 
         /// 
@@ -37,16 +77,16 @@ namespace TestEventFire
         private void btnRaiseEvent_Click(object sender, RoutedEventArgs e)
         {
             Debug.Write($"Raising Event with arg={txtTesto.Text}{Environment.NewLine}");
-            if (EventTest != null)
+            if (TestEvent != null)
             {
-                EventTest(this, new EventTestArgs(txtTesto.Text));
+                TestEvent(this, new TestEventArgs(txtTesto.Text));
             }
         }
 
         /// 
         /// 1
         /// 
-        
+
 
 
         private void btnSubscribeEvent_Click1(object sender, RoutedEventArgs e)
@@ -58,10 +98,10 @@ namespace TestEventFire
 
             addTimedLogText1("Subscribing");
             alreadySubscribed1 = true;
-            EventTest += OnEventOne1;
+            TestEvent += OnEventOne1;
         }
 
-        private void OnEventOne1(object sender, EventTestArgs e)
+        private void OnEventOne1(object sender, TestEventArgs e)
         {
             if (sender == null)
             {
@@ -82,7 +122,7 @@ namespace TestEventFire
 
             addTimedLogText1("UnSubscribing");
             alreadySubscribed1 = false;
-            EventTest -= OnEventOne1;
+            TestEvent -= OnEventOne1;
 
         }
 
@@ -111,10 +151,10 @@ namespace TestEventFire
 
             addTimedLogText2("Subscribing");
             alreadySubscribed2 = true;
-            EventTest += OnEventOne2;
+            TestEvent += OnEventOne2;
         }
 
-        private void OnEventOne2(object sender, EventTestArgs e)
+        private void OnEventOne2(object sender, TestEventArgs e)
         {
             if (sender == null)
             {
@@ -134,7 +174,7 @@ namespace TestEventFire
 
             addTimedLogText2("UnSubscribing");
             alreadySubscribed2 = false;
-            EventTest -= OnEventOne2;
+            TestEvent -= OnEventOne2;
         }
 
         private void addTimedLogText2(string testo)
@@ -148,7 +188,20 @@ namespace TestEventFire
             addTimedLogText2("ResetLog");
         }
 
+        /// 
+        /// 3
+        /// 
 
+        private void btnResetLog_Click3(object sender, RoutedEventArgs e)
+        {
+            txtLog3.Text = "";
+            addTimedLogText3("ResetLog");
+        }
+
+        private void addTimedLogText3(string testo)
+        {
+            txtLog3.Text += $"{Environment.NewLine}{DateTime.Now} - {testo}";
+        }
 
     }
 }
