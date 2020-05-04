@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Windows;
 
 namespace TestEventFire
@@ -7,10 +8,10 @@ namespace TestEventFire
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     /// 
-    internal class EventOneArgs : EventArgs
+    internal class EventTestArgs : EventArgs
     {
         public string Testo { get; set; }
-        public EventOneArgs(string testo)
+        public EventTestArgs(string testo)
         {
             Testo = testo;
         }
@@ -19,17 +20,48 @@ namespace TestEventFire
     public partial class MainWindow : Window
     {
 
-        private bool alreadySubscribed = false;
+        private bool alreadySubscribed1 = false;
+        private bool alreadySubscribed2 = false;
 
-        private event EventHandler<EventOneArgs> EventOne;// = delegate { };
+        private event EventHandler<EventTestArgs> EventTest;// = delegate { };
 
         public MainWindow()
         {
             InitializeComponent();
-            //EventOne += OnEventOne;
         }
 
-        private void OnEventOne(object sender, EventOneArgs e)
+        /// 
+        /// 0
+        /// 
+
+        private void btnRaiseEvent_Click(object sender, RoutedEventArgs e)
+        {
+            Debug.Write($"Raising Event with arg={txtTesto.Text}{Environment.NewLine}");
+            if (EventTest != null)
+            {
+                EventTest(this, new EventTestArgs(txtTesto.Text));
+            }
+        }
+
+        /// 
+        /// 1
+        /// 
+        
+
+
+        private void btnSubscribeEvent_Click1(object sender, RoutedEventArgs e)
+        {
+            if (alreadySubscribed1)
+            {
+                return;
+            }
+
+            addTimedLogText1("Subscribing");
+            alreadySubscribed1 = true;
+            EventTest += OnEventOne1;
+        }
+
+        private void OnEventOne1(object sender, EventTestArgs e)
         {
             if (sender == null)
             {
@@ -37,56 +69,86 @@ namespace TestEventFire
             }
 
             System.Diagnostics.Debug.Write($"OnEventOne - {DateTime.Now}{Environment.NewLine}");
-            addTimedLogText($"Received event with arg={e.Testo}");
+            addTimedLogText1($"Received event with arg={e.Testo}");
         }
 
-        private void btnRaiseEvent_Click(object sender, RoutedEventArgs e)
-        {
-            addTimedLogText("Raising Event with arg={txtTesto.Text}");
-            if (EventOne != null)
-            {
-                EventOne(this, new EventOneArgs(txtTesto.Text));
-            }
-        }
 
-        private void btnSubscribeEvent_Click(object sender, RoutedEventArgs e)
+        private void btnUnSubscribeEvent_Click1(object sender, RoutedEventArgs e)
         {
-            subscribeOnce();
-        }
-        private void subscribeOnce()
-        {
-            if (alreadySubscribed)
+            if (!alreadySubscribed1)
             {
                 return;
             }
 
-            addTimedLogText("Subscribing");
-            alreadySubscribed = true;
-            EventOne += OnEventOne;
+            addTimedLogText1("UnSubscribing");
+            alreadySubscribed1 = false;
+            EventTest -= OnEventOne1;
+
         }
 
-        private void btnUnSubscribeEvent_Click(object sender, RoutedEventArgs e)
+
+        private void addTimedLogText1(string testo)
         {
-            if (!alreadySubscribed)
+            txtLog1.Text += $"{Environment.NewLine}{DateTime.Now} - {testo}";
+        }
+
+        private void btnResetLog_Click1(object sender, RoutedEventArgs e)
+        {
+            txtLog1.Text = "";
+            addTimedLogText1("ResetLog");
+        }
+
+        /// 
+        /// 2
+        /// 
+
+        private void btnSubscribeEvent_Click2(object sender, RoutedEventArgs e)
+        {
+            if (alreadySubscribed2)
             {
                 return;
             }
 
-            addTimedLogText("UnSubscribing");
-            alreadySubscribed = false;
-            EventOne -= OnEventOne;
-
+            addTimedLogText2("Subscribing");
+            alreadySubscribed2 = true;
+            EventTest += OnEventOne2;
         }
 
-        private void btnResetLog_Click(object sender, RoutedEventArgs e)
+        private void OnEventOne2(object sender, EventTestArgs e)
         {
-            txtLog.Text = "";
-            addTimedLogText("ResetLog");
+            if (sender == null)
+            {
+                return;
+            }
+
+            System.Diagnostics.Debug.Write($"OnEventOne - {DateTime.Now}{Environment.NewLine}");
+            addTimedLogText2($"Received event with arg={e.Testo}");
         }
 
-        private void addTimedLogText(string testo)
+        private void btnUnSubscribeEvent_Click2(object sender, RoutedEventArgs e)
         {
-            txtLog.Text += $"{Environment.NewLine}{DateTime.Now} - {testo}";
+            if (!alreadySubscribed2)
+            {
+                return;
+            }
+
+            addTimedLogText2("UnSubscribing");
+            alreadySubscribed2 = false;
+            EventTest -= OnEventOne2;
         }
+
+        private void addTimedLogText2(string testo)
+        {
+            txtLog2.Text += $"{Environment.NewLine}{DateTime.Now} - {testo}";
+        }
+
+        private void btnResetLog_Click2(object sender, RoutedEventArgs e)
+        {
+            txtLog1.Text = "";
+            addTimedLogText2("ResetLog");
+        }
+
+
+
     }
 }

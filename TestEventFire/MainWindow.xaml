@@ -4,28 +4,46 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:local="clr-namespace:TestEventFire"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        Title="MainWindow" Width="800" Height="450" mc:Ignorable="d">
-    <DockPanel>
-        <Border Margin="10" BorderBrush="Red" BorderThickness="1">
-            <StackPanel>
-                <TextBlock Text="Inserire il testo che il messaggio trasmetterà" />
-                <TextBox x:Name="txtTesto" Width="100" Text="Testo di prova" />
-                <Button x:Name="btnRaiseEvent" Click="btnRaiseEvent_Click"
-                        Content="Raise Event" />
-                <Button x:Name="btnSubscribeEvent" Click="btnSubscribeEvent_Click"
-                        Content="Subscribe Event" />
-                <Button x:Name="btnUnSubscribeEvent"
-                        Click="btnUnSubscribeEvent_Click"
-                        Content="UnSubscribe Event" />
-
-            </StackPanel>
-        </Border>
-        <Border Margin="10" BorderBrush="Green" BorderThickness="2">
+        Title="MainWindow" Width="800" Height="450"
+        SizeToContent="Width" mc:Ignorable="d">
+    <DockPanel LastChildFill="False">
+        <Border Margin="10" BorderBrush="Green" BorderThickness="1">
             <DockPanel>
-                <Button x:Name="btnResetLog" Click="btnResetLog_Click"
-                        Content="Reset Log" DockPanel.Dock="Bottom" />
-                <TextBlock x:Name="txtLog" MinWidth="200" MinHeight="200" />
+                <TextBlock DockPanel.Dock="Top" Text="Inserire il testo che il messaggio trasmetterà" />
+                <TextBox x:Name="txtTesto" Width="100" DockPanel.Dock="Top"
+                         Text="Testo di prova" />
+                <Button x:Name="btnRaiseEvent" Click="btnRaiseEvent_Click"
+                        Content="Raise Event" DockPanel.Dock="Top" />
+                <TextBlock x:Name="txtLog0" />
             </DockPanel>
         </Border>
+
+        <Border Margin="10" BorderBrush="Yellow" BorderThickness="2">
+            <DockPanel>
+                <Button Click="btnSubscribeEvent_Click1" Content="Subscribe Event"
+                        DockPanel.Dock="Top" />
+                <Button x:Name="btnUnSubscribeEvent"
+                        Click="btnUnSubscribeEvent_Click1"
+                        Content="UnSubscribe Event" DockPanel.Dock="Top" />
+
+                <Button x:Name="btnResetLog" Click="btnResetLog_Click1"
+                        Content="Reset Log" DockPanel.Dock="Bottom" />
+                <TextBlock x:Name="txtLog1" MinWidth="200" MinHeight="200" />
+            </DockPanel>
+        </Border>
+
+        <Border Margin="10" BorderBrush="Red" BorderThickness="2">
+            <DockPanel>
+                <Button Click="btnSubscribeEvent_Click2" Content="Subscribe Event"
+                        DockPanel.Dock="Top" />
+                <Button Click="btnUnSubscribeEvent_Click2"
+                        Content="UnSubscribe Event" DockPanel.Dock="Top" />
+
+                <Button Click="btnResetLog_Click2" Content="Reset Log"
+                        DockPanel.Dock="Bottom" />
+                <TextBlock x:Name="txtLog2" MinWidth="200" MinHeight="200" />
+            </DockPanel>
+        </Border>
+
     </DockPanel>
 </Window>
