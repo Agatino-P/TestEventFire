@@ -1,0 +1,31 @@
+﻿<Window x:Class="TestEventFire.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:local="clr-namespace:TestEventFire"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        Title="MainWindow" Width="800" Height="450" mc:Ignorable="d">
+    <DockPanel>
+        <Border Margin="10" BorderBrush="Red" BorderThickness="1">
+            <StackPanel>
+                <TextBlock Text="Inserire il testo che il messaggio trasmetterà" />
+                <TextBox x:Name="txtTesto" Width="100" Text="Testo di prova" />
+                <Button x:Name="btnRaiseEvent" Click="btnRaiseEvent_Click"
+                        Content="Raise Event" />
+                <Button x:Name="btnSubscribeEvent" Click="btnSubscribeEvent_Click"
+                        Content="Subscribe Event" />
+                <Button x:Name="btnUnSubscribeEvent"
+                        Click="btnUnSubscribeEvent_Click"
+                        Content="UnSubscribe Event" />
+
+            </StackPanel>
+        </Border>
+        <Border Margin="10" BorderBrush="Green" BorderThickness="2">
+            <DockPanel>
+                <Button x:Name="btnResetLog" Click="btnResetLog_Click"
+                        Content="Reset Log" DockPanel.Dock="Bottom" />
+                <TextBlock x:Name="txtLog" MinWidth="200" MinHeight="200" />
+            </DockPanel>
+        </Border>
+    </DockPanel>
+</Window>
