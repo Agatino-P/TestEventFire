@@ -18,51 +18,28 @@ namespace TestEventFire
         }
     }
 
-    public class Subscriber1
+    public class Subscriber
     {
         public string Name { get; set; }
         private MainWindow _mainWindow;
 
-        public Subscriber1(MainWindow mainWindow, string name)
+        private static Random rand = new Random();
+
+        public Subscriber(MainWindow mainWindow, string name)
         {
             _mainWindow = mainWindow;
             Name = name;
             _mainWindow.TestEvent += TestEventCaller;
         }
 
-        public void TestEventCaller(object sender, TestEventArgs e)
+        private void TestEventCaller(object sender, TestEventArgs e)
         {
-            Debug.WriteLine( $"{DateTime.Now:hh:mm:ss.fff tt} - {Name} Start: {e.Testo}{Environment.NewLine}");
-            Random rand = new Random();
-            int ms = rand.Next(5000, 10000);
+            //e.Testo = $"{Name}:Event Received";
+            Debug.WriteLine( $"{Name} Started working on event at: {DateTime.Now:hh:mm:ss.fff tt}\n ");
+            int ms = rand.Next(500, 10000);
             System.Threading.Thread.Sleep(ms);
-            Debug.WriteLine($"{DateTime.Now:hh:mm:ss.fff tt} - {Name} End: {e.Testo}{Environment.NewLine}");
+            Debug.WriteLine($"{Name} Ended working on event at: {DateTime.Now:hh:mm:ss.fff tt} after {ms:N}ms\n ");
         }
-    }
-
-
-    public class Subscriber2
-    {
-        public string Name { get; set; }
-        private MainWindow _mainWindow;
-
-        public Subscriber2(MainWindow mainWindow, string name)
-        {
-            _mainWindow = mainWindow;
-            Name = name;
-            _mainWindow.TestEvent += TestEventCaller;
-        }
-
-        public void TestEventCaller(object sender, TestEventArgs e)
-        {
-
-            Debug.WriteLine($"{DateTime.Now:hh:mm:ss.fff tt} - {Name} Start: {e.Testo}{Environment.NewLine}");
-            Random rand = new Random();
-            int ms = rand.Next(1000, 3000);
-            System.Threading.Thread.Sleep(ms);
-            Debug.WriteLine($"{DateTime.Now:hh:mm:ss.fff tt} - {Name} End: {e.Testo}{Environment.NewLine}");
-        }
-
     }
 
     public partial class MainWindow : Window
@@ -71,14 +48,18 @@ namespace TestEventFire
         private bool alreadySubscribed1 = false;
         private bool alreadySubscribed2 = false;
 
-        public event EventHandler<TestEventArgs> TestEvent;
+        public event EventHandler<TestEventArgs> TestEvent = delegate {};
         public delegate string TestEventCaller(string testo);
 
         public MainWindow()
         {
             InitializeComponent();
-            Subscriber1 s1 = new Subscriber1(this, "S-uno");
-            Subscriber2 s2 = new Subscriber2(this, "S-due");
+            int numSubscribers = 5;
+            for (int subscriberIndex=  0; subscriberIndex < numSubscribers; subscriberIndex++)
+            {
+                new Subscriber(this, subscriberIndex.ToString());
+            }
+            
         }
 
         /// 
@@ -89,44 +70,21 @@ namespace TestEventFire
         {
             Debug.Write($"Raising Event with arg={txtTesto.Text}{Environment.NewLine}");
 
-            //this Crashes
-            //TestEvent.BeginInvoke(this, new TestEventArgs(txtTesto.Text),null,null);
-
             //Works, but Syncronous, just like Invoke
             //TestEvent(this, new TestEventArgs(txtTesto.Text));
 
+            //this Crashes
+            //TestEvent.BeginInvoke(this, new TestEventArgs(txtTesto.Text),null,null);
 
-
-
-            var args = new TestEventArgs(txtLog3.Text);
+            
 
             var receivers = TestEvent.GetInvocationList();
             foreach (EventHandler<TestEventArgs> receiver in receivers)
             {
-                receiver.BeginInvoke(this, args, null, null);
-            }
-
-
-            
-         //   foreach (Delegate singleCast in TestEvent.GetInvocationList())
-            //{
-            
-            //    try
-            //    {
-            //        ISynchronizeInvoke syncInvoke = (ISynchronizeInvoke)singleCast.Target;
-            //        if (syncInvoke != null && syncInvoke.InvokeRequired)
-            //        {
-            //            syncInvoke.BeginInvoke(singleCast, new string[] { txtTesto.Text });
-            //        }
-            //        else
-            //        {
-            //            singleCast.DynamicInvoke(new string[] { txtTesto.Text });
-            //        }
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //    }
-            //}
+                TestEventArgs tea = new TestEventArgs(txtLog3.Text);
+                receiver.BeginInvoke(this, tea , null, null);
+                txtLog3.Text += tea.Testo + "\n";
+                    }
         }
 
         /// 
