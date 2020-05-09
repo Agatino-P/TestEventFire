@@ -6,6 +6,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         Title="MainWindow" Width="800" Height="450"
         SizeToContent="Width" mc:Ignorable="d">
+    <Window.DataContext>
+        <Binding RelativeSource="{RelativeSource Self}" />
+    </Window.DataContext>
     <DockPanel LastChildFill="False">
         <Border Margin="10" BorderBrush="Green" BorderThickness="1">
             <DockPanel>
@@ -18,33 +21,6 @@
             </DockPanel>
         </Border>
 
-        <Border Margin="10" BorderBrush="Yellow" BorderThickness="2">
-            <DockPanel>
-                <Button Click="btnSubscribeEvent_Click1" Content="Subscribe Event"
-                        DockPanel.Dock="Top" />
-                <Button x:Name="btnUnSubscribeEvent"
-                        Click="btnUnSubscribeEvent_Click1"
-                        Content="UnSubscribe Event" DockPanel.Dock="Top" />
-
-                <Button x:Name="btnResetLog" Click="btnResetLog_Click1"
-                        Content="Reset Log" DockPanel.Dock="Bottom" />
-                <TextBlock x:Name="txtLog1" MinWidth="200" MinHeight="200" />
-            </DockPanel>
-        </Border>
-
-        <Border Margin="10" BorderBrush="Red" BorderThickness="2">
-            <DockPanel>
-                <Button Click="btnSubscribeEvent_Click2" Content="Subscribe Event"
-                        DockPanel.Dock="Top" />
-                <Button Click="btnUnSubscribeEvent_Click2"
-                        Content="UnSubscribe Event" DockPanel.Dock="Top" />
-
-                <Button Click="btnResetLog_Click2" Content="Reset Log"
-                        DockPanel.Dock="Bottom" />
-                <TextBlock x:Name="txtLog2" MinWidth="200" MinHeight="200" />
-            </DockPanel>
-        </Border>
-
         <Border Margin="10" BorderBrush="Orange" BorderThickness="2">
             <DockPanel>
                 <Button Click="btnResetLog_Click3" Content="Reset Log"
@@ -52,6 +28,12 @@
                 <TextBlock x:Name="txtLog3" MinWidth="200" MinHeight="200" />
             </DockPanel>
         </Border>
-
+        <Border BorderBrush="Black" BorderThickness="2">
+            <StackPanel>
+                <TextBlock Text="Binding MyProperty:" />
+                <TextBox Background="Azure" Text="{Binding MyProperty}" />
+                <Button Click="Callbacks_Click" Content="CallBacks" />
+            </StackPanel>
+        </Border>
     </DockPanel>
 </Window>

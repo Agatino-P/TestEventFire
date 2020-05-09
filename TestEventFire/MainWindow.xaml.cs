@@ -1,6 +1,6 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Diagnostics;
+using System.Threading;
 using System.Windows;
 
 namespace TestEventFire
@@ -29,38 +29,78 @@ namespace TestEventFire
         {
             _mainWindow = mainWindow;
             Name = name;
-            _mainWindow.TestEvent += TestEventCaller;
+            _mainWindow.TestEvent += ReceivedTestEvent;
         }
 
-        private void TestEventCaller(object sender, TestEventArgs e)
+        private void ReceivedTestEvent(object sender, TestEventArgs e)
         {
-            //e.Testo = $"{Name}:Event Received";
-            Debug.WriteLine( $"{Name} Started working on event at: {DateTime.Now:hh:mm:ss.fff tt}\n ");
-            int ms = rand.Next(500, 10000);
+
+            Debug.WriteLine($"{Name} Started working on event at: {DateTime.Now:hh:mm:ss.fff tt} Thread{System.Threading.Thread.CurrentThread.ManagedThreadId}\n ");
+            int ms = rand.Next(50, 2000);
             System.Threading.Thread.Sleep(ms);
-            Debug.WriteLine($"{Name} Ended working on event at: {DateTime.Now:hh:mm:ss.fff tt} after {ms:N}ms\n ");
+            Debug.WriteLine($"{Name} Ended working on event at: {DateTime.Now:hh:mm:ss.fff tt} after {ms:N}ms Thread{System.Threading.Thread.CurrentThread.ManagedThreadId}\n ");
         }
     }
 
     public partial class MainWindow : Window
     {
 
-        private bool alreadySubscribed1 = false;
-        private bool alreadySubscribed2 = false;
+        private static object lockHandle = new object();
 
-        public event EventHandler<TestEventArgs> TestEvent = delegate {};
+        public int MyProperty
+        {
+            get => (int)GetValue(MyPropertyProperty);
+            set => SetValue(MyPropertyProperty, value);
+        }
+        public static readonly DependencyProperty MyPropertyProperty =
+            DependencyProperty.Register("MyProperty", typeof(int), typeof(MainWindow), new PropertyMetadata(0));
+
+        public int NumCallBacks { get; set; } = 0;
+
+        public event EventHandler<TestEventArgs> TestEvent;// = delegate { };
         public delegate string TestEventCaller(string testo);
 
         public MainWindow()
         {
             InitializeComponent();
-            int numSubscribers = 5;
-            for (int subscriberIndex=  0; subscriberIndex < numSubscribers; subscriberIndex++)
+            int numSubscribers = 15;
+            for (int subscriberIndex = 0; subscriberIndex < numSubscribers; subscriberIndex++)
             {
                 new Subscriber(this, subscriberIndex.ToString());
             }
-            
+
         }
+
+        private void finishedCallback(IAsyncResult ar)
+        {
+            var dispatcher = Application.Current.Dispatcher;
+            if (dispatcher.CheckAccess())
+            {
+                updateCounter();
+            }
+            else
+            {
+                dispatcher.Invoke(new Action(() => updateCounter()));
+            }
+        }
+
+        private void updateCounter()
+        {
+            int thID = System.Threading.Thread.CurrentThread.ManagedThreadId;
+            Debug.WriteLine($"{thID} Entering CallBack\n");
+
+
+            thID = System.Threading.Thread.CurrentThread.ManagedThreadId;
+          //  lock (lockHandle) //Lock is needed if not going through Dispatcher
+            {
+                Debug.WriteLine($"{thID} inside (Dispatched) Lock\n");
+                int a = MyProperty;
+                Thread.Sleep(1000);
+                MyProperty = a + 1;
+            }
+            Debug.WriteLine($"{thID} Exiting CallBack Lock\n");
+        }
+
 
         /// 
         /// 0
@@ -76,119 +116,17 @@ namespace TestEventFire
             //this Crashes
             //TestEvent.BeginInvoke(this, new TestEventArgs(txtTesto.Text),null,null);
 
-            
+            MyProperty = 0;
 
             var receivers = TestEvent.GetInvocationList();
             foreach (EventHandler<TestEventArgs> receiver in receivers)
             {
                 TestEventArgs tea = new TestEventArgs(txtLog3.Text);
-                receiver.BeginInvoke(this, tea , null, null);
-                txtLog3.Text += tea.Testo + "\n";
-                    }
-        }
 
-        /// 
-        /// 1
-        /// 
-
-        private void btnSubscribeEvent_Click1(object sender, RoutedEventArgs e)
-        {
-            if (alreadySubscribed1)
-            {
-                return;
+                IAsyncResult ar = receiver.BeginInvoke(this, tea, finishedCallback, null);
             }
-
-            addTimedLogText1("Subscribing");
-            alreadySubscribed1 = true;
-            //TestEvent += OnEventOne1;
         }
 
-        private void OnEventOne1(object sender, TestEventArgs e)
-        {
-            if (sender == null)
-            {
-                return;
-            }
-
-            System.Diagnostics.Debug.Write($"OnEventOne - {DateTime.Now:hh:mm:ss.fff tt}{Environment.NewLine}");
-            addTimedLogText1($"Received event with arg={e.Testo}");
-        }
-
-
-        private void btnUnSubscribeEvent_Click1(object sender, RoutedEventArgs e)
-        {
-            if (!alreadySubscribed1)
-            {
-                return;
-            }
-
-            addTimedLogText1("UnSubscribing");
-            alreadySubscribed1 = false;
-            //TestEvent -= OnEventOne1;
-
-        }
-
-
-        private void addTimedLogText1(string testo)
-        {
-            txtLog1.Text += $"{Environment.NewLine}{DateTime.Now:hh:mm:ss.fff tt} - {testo}";
-        }
-
-        private void btnResetLog_Click1(object sender, RoutedEventArgs e)
-        {
-            txtLog1.Text = "";
-            addTimedLogText1("ResetLog");
-        }
-
-        /// 
-        /// 2
-        /// 
-
-        private void btnSubscribeEvent_Click2(object sender, RoutedEventArgs e)
-        {
-            if (alreadySubscribed2)
-            {
-                return;
-            }
-
-            addTimedLogText2("Subscribing");
-            alreadySubscribed2 = true;
-            //TestEvent += OnEventOne2;
-        }
-
-        private void OnEventOne2(object sender, TestEventArgs e)
-        {
-            if (sender == null)
-            {
-                return;
-            }
-
-            System.Diagnostics.Debug.Write($"OnEventOne - {DateTime.Now:hh:mm:ss.fff tt}{Environment.NewLine}");
-            addTimedLogText2($"Received event with arg={e.Testo}");
-        }
-
-        private void btnUnSubscribeEvent_Click2(object sender, RoutedEventArgs e)
-        {
-            if (!alreadySubscribed2)
-            {
-                return;
-            }
-
-            addTimedLogText2("UnSubscribing");
-            alreadySubscribed2 = false;
-            //TestEvent -= OnEventOne2;
-        }
-
-        private void addTimedLogText2(string testo)
-        {
-            txtLog2.Text += $"{Environment.NewLine}{DateTime.Now:hh:mm:ss.fff tt} - {testo}";
-        }
-
-        private void btnResetLog_Click2(object sender, RoutedEventArgs e)
-        {
-            txtLog1.Text = "";
-            addTimedLogText2("ResetLog");
-        }
 
         /// 
         /// 3
@@ -205,5 +143,14 @@ namespace TestEventFire
             txtLog3.Text += $"{Environment.NewLine}{DateTime.Now:hh:mm:ss.fff tt} - {testo}";
         }
 
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Callbacks_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show(NumCallBacks.ToString(), "CallBacks");
+        }
     }
 }
